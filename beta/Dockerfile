@@ -8,5 +8,7 @@ RUN mkdir /etc/service/beta
 ADD run-beta /etc/service/beta/run
 RUN chmod +x /etc/service/beta/run
 
+ADD static /deploy
+
 EXPOSE 80
 ENTRYPOINT ["/sbin/my_init"]

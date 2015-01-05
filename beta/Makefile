@@ -30,7 +30,13 @@ static/client.js: client/clientmain.go
 
 run: beta static/client.js
 	docker build -t beta .
-	docker run --link=etcd:etcd -v $(PWD)/static:/static -p=`boot2docker ip`:8080:80 beta 
+	docker run \
+		--link=etcd:etcd \
+		-v $(PWD)/static:/static \
+		-e STATIC_DIR=/static \
+		-e ETCD_HOST=etcd \
+		-e ETCD_PORT=4001 \
+ 		-p=`boot2docker ip`:8080:80 beta 
 
 open: beta static/client.js
 	open http://`boot2docker ip`:8080/index.html

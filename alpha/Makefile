@@ -19,7 +19,13 @@ alpha: main.go
 
 run: alpha
 	docker build -t alpha .
-	docker run --link=etcd:etcd --link=postgres:postgres -p=`boot2docker ip`:8081:80 alpha 
+	docker run \
+	--link=etcd:etcd \
+	--link=postgres:postgres \
+	-e ETCD_HOST=etcd \
+	-e ETCD_PORT=4001 \
+	-e POSTGRES_HOST=postgres \
+	-p=`boot2docker ip`:8081:80 alpha 
 
 open: alpha
 	open http://`boot2docker ip`:8081/index.html

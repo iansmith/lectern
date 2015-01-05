@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"strings"
 
 	"github.com/coreos/go-etcd/etcd"
@@ -16,13 +17,6 @@ import (
 const (
 	USERPROP = "postgres/host_count/username"
 	PWDPROP  = "postgres/host_count/password"
-)
-
-var (
-	peers = []string{
-		"http://localhost:4001",
-		"http://etcd:4001", //for local dev case
-	}
 )
 
 func post(w http.ResponseWriter, r *http.Request) {
@@ -62,8 +56,12 @@ func apiHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func etcdConfig() []string {
+	return []string{"http://" + os.Getenv("ETCD_HOST") + ":" + os.Getenv("ETCD_PORT")}
+}
+
 func ReadKV(name string) (string, error) {
-	client := etcd.NewClient(peers)
+	client := etcd.NewClient(etcdConfig())
 	resp, err := client.Get(name, false, false)
 	if err != nil {
 		//special case not found
@@ -76,7 +74,7 @@ func ReadKV(name string) (string, error) {
 }
 
 func WriteKV(name string, value string) error {
-	client := etcd.NewClient(peers)
+	client := etcd.NewClient(etcdConfig())
 	_, err := client.Set(name, value, 0)
 	if err != nil {
 		return err
@@ -123,8 +121,13 @@ type staticFiles struct {
 }
 
 func (s staticFiles) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	log.Printf("serving static content: /%v", r.URL)
-	http.FileServer(http.Dir("/static")).ServeHTTP(w, r)
+	staticDir := os.Getenv("STATIC_DIR")
+	if staticDir == "" {
+		log.Printf("STATIC_DIR not set, using /tmp!")
+		staticDir = "/tmp"
+	}
+	log.Printf("serving static content (%s): /%v", staticDir, r.URL)
+	http.FileServer(http.Dir(staticDir)).ServeHTTP(w, r)
 }
 
 func main() {

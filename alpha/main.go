@@ -18,12 +18,9 @@ const (
 	PWDPROP  = "postgres/host_count/password"
 )
 
-var (
-	peers = []string{
-		"http://localhost:4001",
-		"http://etcd:4001", //for local dev case
-	}
-)
+func etcdConfig() []string {
+	return []string{"http://" + os.Getenv("ETCD_HOST") + ":" + os.Getenv("ETCD_PORT")}
+}
 
 type HostCount struct {
 	Hostname string `qbs:"pk"`
@@ -31,7 +28,7 @@ type HostCount struct {
 }
 
 func ReadKV(name string) (string, error) {
-	client := etcd.NewClient(peers)
+	client := etcd.NewClient(etcdConfig())
 	resp, err := client.Get(name, false, false)
 	if err != nil {
 		//special case not found
@@ -45,7 +42,7 @@ func ReadKV(name string) (string, error) {
 
 func tryPostgres(user string, pwd string) (*sql.DB, error) {
 	app := "alpha"
-	host := "postgres"
+	host := os.Getenv("POSTGRES_HOST")
 	url := fmt.Sprintf("postgres://%s:%s@%s/%s?sslmode=disable", user, pwd, host, app)
 	log.Printf("trying postgres url: %s", url)
 	return sql.Open("postgres", url)

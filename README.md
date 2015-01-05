@@ -1,14 +1,5 @@
 # LECTERN: Getting you up to speed on deis
 
-## Git chicanery at setup
-You should clone this entire repo with `git clone git@github.com:iansmith/lectern`.
-That will create the `lectern` directory. All the commands in this document
-assume you are in this directory.
-
->>>> This part is highly non-standard but makes the demo easier to deal with.
-
-* Remove the .git directory and its contents 
-
 ## Pre-requisite: Docker
 
 ### Docker on Mac
@@ -163,17 +154,27 @@ whenever you want to restart.
 on OSX (only).
 
 ### Running the beta app on linux or "by hand"
-For some _hostip_ and _hostport_:
+For some _hostip_ and host port (we are using 8080 for beta in the document)
+this is the what the `make run` target
+does:
 
 ```
 cd beta
 make
 docker build -t beta .
-docker run --link etcd:etcd -v $PWD/static:/static -p=hostip:hostport:80 beta
+docker run --link etcd:etcd \
+	-v $PWD/static:/static \
+	-e STATIC_DIR=/static \
+	-e ETCD_HOST=etcd \
+	-e ETCD_PORT=4001 \
+	-p=hostip:8081:80 beta
 ```
+
 
 ### Configuration of the Database Params With Beta
 -----------------------------------------------
+You can access the beta app at port 8080 either on your local machine
+(linux) or on the ip addr of the boot2docker host (probably 192.168.59.103).
 
 "beta" is a simple AJAX app for setting the configuration parameters that 
 be used for the database access by the alpha application (see below).  For
@@ -191,5 +192,117 @@ happens to alpha.  The username and password is burned into the
 database image in use with this demo and is not easily changed (see
 `images/database/provision.sh` and `images/database/provision.sql`).
 
+You may find it interesting to look in the `static` dir and notice that you
+can "live edit" the `index.html` or any other content files.
+
+## Pushing the app to staging
+
+For now, we are going to push a copy of our image to 
+[docker hub](http://hub.docker.com) to make this as easy as possible.  You'll
+need to know your docker hub user name in this section.  In a real app
+you would probably want to use a CI pipeline or similar.
+
+* Check to make sure the image is built on your system :`docker images | grep beta`
+* Tag the image you want to manipulate: `docker tag beta dockerhubusername/my-beta`
+* Push to docker hub with `docker push dockerhubusername/my-beta`.  Sadly this
+image contains a decent portion of ubuntu 14.10.
+* Use the app name you created earlier to push that build to staging: 
+`deis builds:create dockerhubusername/my-beta -a app-name`.  
+
+This will take a few moments as the deis system copies the image into 
+our staging cluster.  This registers a version of the app each time your do the
+`deis builds:create` in case you wanted to roll-back or something like that...
+
+You can go to `http://app-name.apps.iggy.buzz/index.html` to see your app. 
+If you get a "502 bad gateway" that means the app hasn't fully initialized
+yet.  You can just refresh until... What? Don't see what you expect? Ruh-roh...
+
+### Getting all 12-factorish up on it
+
+When that `builds:create` command finished, you should have checked the logs to 
+make sure that your fancy new app started up ok. Try `deis logs -a app-name`
+You'll notice that your app is complaining like this:
+
+```
+2015-01-05T03:57:24UTC linear-countess[cmd.1]: 2015/01/05 03:57:24 STATIC_DIR not set, using /tmp!
+
+```
+
+That's because a 12-factor app uses environment variables to configure it, and
+the `STATIC_DIR` isn't set on staging.  You can set it like this:
+`deis config set -a app-name STATIC_DIR=/deploy`.   This registers a version 
+of the app  each time you change the configuration, in case you want to roll back
+or something like that...  `deis  releases -a app-name` may be instructive.
+
+If you change just this variable, you'll be able to get some content now
+but you'll get a 500 error in the page because...
+two other environment variables need to be configured:
+
+```
+deis config set -a app-name ETCD_HOST=10.21.1.105
+deis config set -a app-name ETCD_PORT=4001
+```
+
+Now, you can go to `http://app-name.apps.iggy.buzz/index.html` and all should
+be well or, if not, you know how to get the logs and see what happened!
+
 ## Creating the alpha app
+
+```
+deis apps:create
+```
+
+We'll call this name `app2-name` in this document.
+
+## Building the alpha app
+
+```
+cd alpha
+make
+```
+
+## Running the alpha app locally
+
+### Running the alpha app locally on OSX
+```
+make run
+```
+
+### Running the alpha app locally on Linux
+
+```
+cd alpha
+make
+docker build -t alpha .
+docker run \
+	--link=etcd:etcd \
+	--link=postgres:postgres \
+	-e ETCD_HOST=etcd \
+	-e ETCD_PORT=4001 \
+	-e POSTGRES_HOST=postgres \
+	hostip:8081:80 alpha 
+```
+
+## Tagging a release of alpha and deploying it to staging
+
+```
+docker tag alpha dockerhubusername/my-alpha
+docker push iansmith/my-alpha
+deis builds:create dockerhubusername/my-alpha -a app2-name
+```
+
+## Setting environment variables for staging
+
+```
+deis config set -a app-name ETCD_HOST=10.21.1.105
+deis config set -a app-name ETCD_PORT=4001
+deis config set -a app-name POSTGRES_HOST=10.21.1.106
+```
+
+
+
+
+
+
+
 
