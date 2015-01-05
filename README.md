@@ -299,6 +299,23 @@ deis config set -a app-name ETCD_PORT=4001
 deis config set -a app-name POSTGRES_HOST=10.21.1.106
 ```
 
+## Configuring the staging postgres
+
+
+## Seeing the output of the alpha application on staging
+
+`http://app2-name.apps.iggy.bz`
+
+## Scaling the application
+
+Whip out four back-end servers.
+
+```
+deis scale cmd=4 -a app2-name.
+```
+
+
+
 
 
 
