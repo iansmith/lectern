@@ -1,5 +1,14 @@
 # LECTERN: Getting you up to speed on deis
 
+## Git chicanery at setup
+You should clone this entire repo with `git clone git@github.com:iansmith/lectern`.
+That will create the `lectern` directory. All the commands in this document
+assume you are in this directory.
+
+>>>> This part is highly non-standard but makes the demo easier to deal with.
+
+* Remove the .git directory and its contents 
+
 ## Pre-requisite: Docker
 
 ### Docker on Mac
@@ -77,7 +86,7 @@ that are needed to test/run locally; it also starts two containers running.
 The two containers that are left running are called `etcd` and `postgres`, you
 can see them with `docker ps` and they can be ignored once started.  Note that if
 you do `make setup` again it destroys the contents of the database and
-the etcd key/value.
+the etcd key/value store.
 
 All this tooling for local only to allow your local workstation to (cheaply)
 simulate the staging/production cluster running deis.
