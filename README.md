@@ -27,7 +27,18 @@ cd /Users/yourusername
 ls
 ```
 You can test that docker is working ok with `docker version` and make sure you
-get no errors and a report that looks like this:
+get no errors and a report that looks like this (the values might be slightly
+different):
+```
+Client version: 1.4.1
+Client API version: 1.16
+Go version (client): go1.3.3
+Git commit (client): 5bc2ff8
+OS/Arch (client): darwin/amd64
+Server version: 1.4.1
+Server API version: 1.16
+Go version (server): go1.3.3
+Git commit (server): 5bc2ff8
 ```
 
 Note that the boot2docker mechanism of mounting your home directory doesn't use
@@ -46,7 +57,7 @@ the deis tool like this:
 
 ```
  curl -sSL http://deis.io/deis-cli/install.sh | sh
- ```
+```
 
 You need to move it somewhere to be in your PATH, perhaps into `/usr/local/bin`
 like this `ln -fs $PWD/deis /usr/local/bin/deis`. 
