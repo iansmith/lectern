@@ -182,4 +182,5 @@ happens to alpha.  The username and password is burned into the
 database image in use with this demo and is not easily changed (see
 `images/database/provision.sh` and `images/database/provision.sql`).
 
+## Creating the alpha app
 

@@ -2,7 +2,6 @@
 .PHONY: clean
 .PHONY: run
 .PHONY: open
-.PHONY: start_etcd
 
 all: beta static/client.js
 
@@ -35,9 +34,6 @@ run: beta static/client.js
 
 open: beta static/client.js
 	open http://`boot2docker ip`:8080/index.html
-
-start_etcd:
-	docker run -d -name etcd etcd
 
 ##
 ## You only need this target if you wante to *CREATE* a new vendored
