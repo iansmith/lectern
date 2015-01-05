@@ -1,0 +1,9 @@
+export DOCKER_HOST=tcp://192.168.59.103:2376
+export DOCKER_CERT_PATH=/Users/iansmith/.boot2docker/certs/boot2docker-vm
+export DOCKER_TLS_VERIFY=1
+
+# I don't put things in my path implicitly
+export PATH=/Users/iansmith/deis.src/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin
+
+##useful for manipulating godeps
+export GOPATH=/Users/iansmith/lectern.src/external

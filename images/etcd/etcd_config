@@ -1,0 +1,12 @@
+#!/bin/sh
+
+##
+## These are the "seed" values for running on a development machine
+##
+
+echo "waiting for etcd to start..."
+sleep 3
+
+#/bin/etcdctl set /app/beta/db/username postgres
+#/bin/etcdctl set /app/beta/db/password postgres
+
